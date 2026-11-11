@@ -1,16 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/product_provider.dart';
-import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/admin_sidebar.dart';
 import '../widgets/kpi_card.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_table_view.dart';
-import 'login_screen.dart';
 import 'product_detail_screen.dart';
 import 'product_form_screen.dart';
 

@@ -75,7 +75,6 @@ class AppTheme {
         seedColor: primary,
         primary: primary,
         surface: surface,
-        background: background,
         error: danger,
       ),
       fontFamily: 'Segoe UI', // Fallback standard font
@@ -91,7 +90,7 @@ class AppTheme {
           fontWeight: FontWeight.w700,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
         shape: RoundedRectangleBorder(

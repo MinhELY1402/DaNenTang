@@ -71,15 +71,15 @@ class ProductTableView extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 800),
           child: DataTable(
-            headingRowColor: MaterialStateProperty.all(AppTheme.background),
+            headingRowColor: WidgetStateProperty.all(AppTheme.background),
             headingTextStyle: const TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
-            dataRowColor: MaterialStateProperty.resolveWith<Color?>((states) {
-              if (states.contains(MaterialState.hovered)) {
+            dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
+              if (states.contains(WidgetState.hovered)) {
                 return AppTheme.primaryLight.withOpacity(0.5);
               }
               return AppTheme.surface;
