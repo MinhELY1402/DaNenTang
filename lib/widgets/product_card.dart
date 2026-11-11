@@ -29,7 +29,8 @@ class _ProductCardState extends State<ProductCard> {
   bool _isHovered = false;
 
   String _formatPrice(double price) {
-    return NumberFormat.currency(locale: 'vi_VN', symbol: '₫', decimalDigits: 0).format(price);
+    return NumberFormat.currency(locale: 'vi_VN', symbol: '₫', decimalDigits: 0)
+        .format(price);
   }
 
   Widget _buildProductImage() {
@@ -38,7 +39,8 @@ class _ProductCardState extends State<ProductCard> {
       return Container(
         color: AppTheme.background,
         child: const Center(
-          child: Icon(Icons.inventory_2_outlined, size: 36, color: AppTheme.textMuted),
+          child: Icon(Icons.inventory_2_outlined,
+              size: 36, color: AppTheme.textMuted),
         ),
       );
     }
@@ -50,11 +52,14 @@ class _ProductCardState extends State<ProductCard> {
           base64Decode(base64Content),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const Center(
-            child: Icon(Icons.broken_image, size: 32, color: AppTheme.textMuted),
+            child:
+                Icon(Icons.broken_image, size: 32, color: AppTheme.textMuted),
           ),
         );
       } catch (_) {
-        return const Center(child: Icon(Icons.broken_image, size: 32, color: AppTheme.textMuted));
+        return const Center(
+            child:
+                Icon(Icons.broken_image, size: 32, color: AppTheme.textMuted));
       }
     }
 
@@ -68,7 +73,9 @@ class _ProductCardState extends State<ProductCard> {
         if (loadingProgress == null) return child;
         return Container(
           color: AppTheme.background,
-          child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary)),
+          child: const Center(
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: AppTheme.primary)),
         );
       },
     );
@@ -85,7 +92,9 @@ class _ProductCardState extends State<ProductCard> {
           color: AppTheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _isHovered ? AppTheme.primary.withOpacity(0.5) : AppTheme.border,
+            color: _isHovered
+                ? AppTheme.primary.withOpacity(0.5)
+                : AppTheme.border,
             width: 1,
           ),
           boxShadow: _isHovered ? AppTheme.hoverShadow : AppTheme.cardShadow,
@@ -160,7 +169,8 @@ class _ProductCardState extends State<ProductCard> {
                                     color: AppTheme.primaryLight,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: const Icon(Icons.edit_outlined, size: 16, color: AppTheme.primary),
+                                  child: const Icon(Icons.edit_outlined,
+                                      size: 16, color: AppTheme.primary),
                                 ),
                               ),
                               const SizedBox(width: 6),
@@ -173,7 +183,8 @@ class _ProductCardState extends State<ProductCard> {
                                     color: AppTheme.dangerBg,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: const Icon(Icons.delete_outline, size: 16, color: AppTheme.danger),
+                                  child: const Icon(Icons.delete_outline,
+                                      size: 16, color: AppTheme.danger),
                                 ),
                               ),
                             ],
