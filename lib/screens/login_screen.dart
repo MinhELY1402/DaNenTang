@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import 'admin_dashboard_screen.dart';
 
-/// Màn hình Đăng nhập phân hệ Admin
-/// Đáp ứng yêu cầu 2: Thực hiện đăng nhập, xác thực quyền quản trị viên
+/// Màn hình Đăng nhập phân hệ Admin được thiết kế lại theo chuẩn Split-Layout hiện đại
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -49,200 +49,291 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else if (mounted) {
       setState(() {
-        _errorMessage = 'Tài khoản hoặc mật khẩu không đúng. Vui lòng thử lại!';
+        _errorMessage = 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại!';
       });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade900,
-              Colors.blue.shade600,
-              Colors.lightBlue.shade300,
+  void _fillSampleCredentials() {
+    setState(() {
+      _emailController.text = 'admin@gmail.com';
+      _passwordController.text = 'admin123';
+      _errorMessage = null;
+    });
+  }
+
+  Widget _buildLeftBrandingPanel() {
+    return Container(
+      padding: const EdgeInsets.all(48),
+      color: AppTheme.sidebarBg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.inventory_2, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 14),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ADMIN PORTAL',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  Text(
+                    'Multiplatform Product Management',
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  ),
+                ],
+              ),
             ],
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Card(
-                elevation: 8,
-                shadowColor: Colors.black38,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Logo & Tiêu đề
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.admin_panel_settings, size: 54, color: Colors.blue.shade800),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'HỆ THỐNG QUẢN TRỊ ADMIN',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Quản lý sản phẩm đa nền tảng (Web & Mobile)',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                        ),
-                        const SizedBox(height: 24),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Quản lý sản phẩm\nthời gian thực.',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  height: 1.2,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Đồng bộ tức thì 2 chiều giữa Web Chrome và Mobile App với nền tảng Firebase Cloud Firestore.',
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              _buildFeatureRow(Icons.bolt, 'Đồng bộ Realtime Stream tốc độ cao'),
+              const SizedBox(height: 12),
+              _buildFeatureRow(Icons.devices, 'Một mã nguồn chạy Web và Di động'),
+              const SizedBox(height: 12),
+              _buildFeatureRow(Icons.data_object, 'Xuất cơ sở dữ liệu JSON 4 trường'),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppTheme.sidebarHover,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.sidebarBorder),
+            ),
+            child: const Text(
+              'Môn: Phát triển ứng dụng đa nền tảng • Giữa kỳ',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                        // Khung gợi ý tài khoản chấm điểm
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.amber.shade300),
-                          ),
+  Widget _buildFeatureRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: AppTheme.primary, size: 18),
+        const SizedBox(width: 10),
+        Text(
+          text,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 40),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Đăng nhập Quản trị viên',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Nhập thông tin xác thực để truy cập phân hệ Admin',
+                  style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+
+                // Nút điền tài khoản mẫu tiện lợi cho người chấm thi
+                InkWell(
+                  onTap: _fillSampleCredentials,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryLight,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.primaryBorder),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.bolt, color: AppTheme.primary, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.key, size: 16, color: Colors.amber.shade900),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Tài khoản Demo Admin:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: Colors.amber.shade900,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                'Tài khoản Demo Admin (Bấm để tự điền):',
+                                style: TextStyle(
+                                  color: AppTheme.primaryDark,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Email: admin@gmail.com\nMật khẩu: admin123',
-                                style: TextStyle(fontSize: 12, color: Colors.black87),
+                              Text(
+                                'admin@gmail.com / admin123',
+                                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
                               ),
                             ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Thông báo lỗi nếu có
-                        if (_errorMessage != null) ...[
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.error_outline, color: Colors.red, size: 18),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _errorMessage!,
-                                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        // Ô nhập Email
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Tài khoản Email',
-                            hintText: 'admin@gmail.com',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Vui lòng nhập email admin';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Ô nhập Password
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            labelText: 'Mật khẩu',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                            ),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Vui lòng nhập mật khẩu';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Nút Đăng nhập
-                        SizedBox(
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue.shade800,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                  )
-                                : const Text(
-                                    'ĐĂNG NHẬP ADMIN',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 20),
+
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.dangerBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.dangerBorder),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: AppTheme.danger, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: AppTheme.dangerText, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Input Email
+                const Text(
+                  'Email đăng nhập',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimary),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'admin@gmail.com',
+                    prefixIcon: Icon(Icons.mail_outline, size: 18, color: AppTheme.textMuted),
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập email' : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Input Password
+                const Text(
+                  'Mật khẩu',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimary),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: 'Nhập mật khẩu',
+                    prefixIcon: const Icon(Icons.lock_outline, size: 18, color: AppTheme.textMuted),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 18),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập mật khẩu' : null,
+                ),
+                const SizedBox(height: 24),
+
+                // Nút Đăng nhập
+                SizedBox(
+                  height: 46,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Text('ĐĂNG NHẬP VÀO HỆ THỐNG'),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.surface,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Màn hình rộng (Web/Desktop >= 800px) -> Split-Layout
+          if (constraints.maxWidth >= 800) {
+            return Row(
+              children: [
+                Expanded(flex: 5, child: _buildLeftBrandingPanel()),
+                Expanded(flex: 6, child: _buildLoginForm()),
+              ],
+            );
+          }
+
+          // Màn hình hẹp (Mobile) -> Single Layout
+          return Container(
+            color: AppTheme.background,
+            child: _buildLoginForm(),
+          );
+        },
       ),
     );
   }

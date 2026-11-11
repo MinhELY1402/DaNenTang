@@ -6,6 +6,7 @@ import 'providers/product_provider.dart';
 import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,26 +34,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
       ],
       child: MaterialApp(
-        title: 'Admin Quản Lý Sản Phẩm - Firebase Realtime',
+        title: 'Admin Quản Lý Sản Phẩm - SaaS Redesign',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.blue.shade700,
-            primary: Colors.blue.shade700,
-          ),
-          appBarTheme: const AppBarTheme(
-            centerTitle: false,
-            elevation: 0,
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
-            ),
-          ),
-        ),
+        theme: AppTheme.lightTheme,
         home: Consumer<AuthService>(
           builder: (context, auth, _) {
             if (auth.isAuthenticated) {

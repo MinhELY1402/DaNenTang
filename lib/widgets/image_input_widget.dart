@@ -2,11 +2,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../theme/app_theme.dart';
 
-/// Widget hỗ trợ chọn ảnh trên cả Web và Mobile:
-/// - Chọn ảnh từ thư viện (Gallery) hoặc Camera qua [image_picker]
-/// - Nhập trực tiếp đường dẫn URL hình ảnh
-/// - Có khung xem trước (Preview) ảnh
+/// Widget chọn hình ảnh sản phẩm đa nền tảng theo phong cách Dropzone cao cấp
 class ImageInputWidget extends StatefulWidget {
   final String initialImageUrl;
   final ValueChanged<String> onImageChanged;
@@ -49,7 +47,6 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
       );
 
       if (pickedFile != null) {
-        // Chuyển ảnh thành chuỗi Base64 Data URL để hoạt động đồng nhất trên cả Web và Mobile
         final bytes = await pickedFile.readAsBytes();
         final base64String = 'data:image/jpeg;base64,${base64Encode(bytes)}';
         setState(() {
@@ -61,7 +58,7 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể chọn ảnh: $e')),
+          SnackBar(content: Text('Không thể chọn ảnh: $e'), backgroundColor: AppTheme.danger),
         );
       }
     }
@@ -70,70 +67,75 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
   Widget _buildPreview() {
     if (_currentImage.isEmpty) {
       return Container(
-        height: 160,
+        height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+          color: AppTheme.background,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppTheme.border, style: BorderStyle.solid),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.image_outlined, size: 48, color: Colors.grey.shade400),
-            const SizedBox(height: 8),
-            Text(
-              'Chưa có ảnh (Chọn từ máy hoặc nhập URL)',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: AppTheme.primaryLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.cloud_upload_outlined, size: 28, color: AppTheme.primary),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Tải lên hình ảnh sản phẩm',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimary),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Chọn file từ thiết bị hoặc dán đường dẫn URL bên dưới',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
             ),
           ],
         ),
       );
     }
 
-    // Xử lý xem trước ảnh: Base64 hoặc Network URL
-    Widget imageWidget;
+    Widget imgWidget;
     if (_currentImage.startsWith('data:image')) {
       final base64Content = _currentImage.split(',').last;
-      imageWidget = Image.memory(
+      imgWidget = Image.memory(
         base64Decode(base64Content),
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image, size: 40)),
       );
     } else {
-      imageWidget = Image.network(
+      imgWidget = Image.network(
         _currentImage,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.broken_image, size: 40, color: Colors.redAccent),
+              const Icon(Icons.broken_image, size: 36, color: AppTheme.danger),
               const SizedBox(height: 4),
-              Text(
-                'URL ảnh không tải được',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-              ),
+              const Text('Không tải được ảnh từ URL', style: TextStyle(color: AppTheme.dangerText, fontSize: 12)),
             ],
           ),
         ),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-        },
       );
     }
 
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            height: 180,
-            width: double.infinity,
-            color: Colors.grey.shade200,
-            child: imageWidget,
+        Container(
+          height: 180,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppTheme.border),
           ),
+          clipBehavior: Clip.antiAlias,
+          child: imgWidget,
         ),
         Positioned(
           top: 8,
@@ -152,7 +154,7 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
                 color: Colors.black54,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close, color: Colors.white, size: 18),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
             ),
           ),
         ),
@@ -167,7 +169,7 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
       children: [
         const Text(
           'Hình ảnh sản phẩm (image)*',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimary),
         ),
         const SizedBox(height: 8),
         _buildPreview(),
@@ -178,31 +180,24 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
               child: TextFormField(
                 controller: _urlController,
                 decoration: InputDecoration(
-                  labelText: 'Nhập đường dẫn URL ảnh',
-                  hintText: 'https://...',
-                  prefixIcon: const Icon(Icons.link, size: 20),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  hintText: 'Nhập đường dẫn URL ảnh (https://...)',
+                  prefixIcon: const Icon(Icons.link, size: 18, color: AppTheme.textMuted),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.check, color: Colors.green),
-                    tooltip: 'Tải ảnh từ URL',
+                    icon: const Icon(Icons.check, color: AppTheme.success, size: 18),
+                    tooltip: 'Áp dụng URL',
                     onPressed: () {
                       final url = _urlController.text.trim();
                       if (url.isNotEmpty && !url.startsWith('[')) {
-                        setState(() {
-                          _currentImage = url;
-                        });
+                        setState(() => _currentImage = url);
                         widget.onImageChanged(_currentImage);
                       }
                     },
                   ),
                 ),
-                onChanged: (value) {
-                  final url = value.trim();
+                onChanged: (val) {
+                  final url = val.trim();
                   if (url.startsWith('http://') || url.startsWith('https://')) {
-                    setState(() {
-                      _currentImage = url;
-                    });
+                    setState(() => _currentImage = url);
                     widget.onImageChanged(_currentImage);
                   }
                 },
@@ -213,23 +208,17 @@ class _ImageInputWidgetState extends State<ImageInputWidget> {
         const SizedBox(height: 8),
         Row(
           children: [
-            ElevatedButton.icon(
+            OutlinedButton.icon(
               onPressed: () => _pickImage(ImageSource.gallery),
-              icon: const Icon(Icons.photo_library, size: 18),
-              label: const Text('Chọn từ máy'),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+              icon: const Icon(Icons.photo_library_outlined, size: 16, color: AppTheme.primary),
+              label: const Text('Chọn ảnh từ máy', style: TextStyle(fontSize: 12)),
             ),
             const SizedBox(width: 8),
             if (!kIsWeb)
-              ElevatedButton.icon(
+              OutlinedButton.icon(
                 onPressed: () => _pickImage(ImageSource.camera),
-                icon: const Icon(Icons.camera_alt, size: 18),
-                label: const Text('Chụp ảnh'),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
+                icon: const Icon(Icons.camera_alt_outlined, size: 16, color: AppTheme.primary),
+                label: const Text('Chụp ảnh', style: TextStyle(fontSize: 12)),
               ),
           ],
         ),

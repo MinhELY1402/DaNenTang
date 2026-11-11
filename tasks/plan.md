@@ -1,104 +1,117 @@
-# Implementation Plan: Ứng Dụng Quản Lý Sản Phẩm Đa Nền Tảng (Firebase Realtime Database)
+# Implementation Plan: Redesign Giao Diện & Trải Nghiệm Người Dùng (UX/UI Engineering)
 
 ## Overview
-Dự án được nâng cấp toàn diện sang kiến trúc **Firebase Realtime Database (Cloud Firestore - Bản Free Spark Plan)**. Ứng dụng kết nối trực tiếp với Firestore qua Streams thời gian thực, đảm bảo mọi thao tác Thêm, Sửa, Xóa đều diễn ra Realtime 2 chiều giữa Web và Mobile. **Dữ liệu ứng dụng hoàn toàn không nạp từ file JSON cục bộ**. File `database/products.json` được tạo ra khi người dùng bấm nút xuất dữ liệu để phục vụ việc nộp bài thi.
+Dự án được tái thiết kế toàn diện theo chuẩn **Frontend UI Engineering** và tiêu chuẩn giao diện sản phẩm SaaS/Admin Dashboard hiện đại (như Shopify Admin, Linear, Stripe Dashboard). Mục tiêu là nâng cấp ứng dụng từ phong cách mặc định sang một sản phẩm quản trị cao cấp, chỉn chu, có hệ thống Design System nhất quán, tính năng xem trước (Live Preview), hỗ trợ 2 chế độ xem (Bảng dữ liệu Table & Lưới thẻ Grid), tối ưu hóa trải nghiệm tương tác trên cả Web và Mobile.
 
 ---
 
-## Architecture Decisions
-1. **Database: Firebase Cloud Firestore (Gói Free Spark)**
-   - *Lý do:* Miễn phí 100%, hỗ trợ Realtime Stream lắng nghe dữ liệu `collection('products').snapshots()`. Thao tác trên Web lập tức cập nhật trên Mobile và ngược lại mà không cần tải lại trang.
-   - Thao tác CRUD ghi trực tiếp lên Firebase Firestore.
-2. **Data Isolation & 4-Field Contract:**
-   - Mỗi document trong collection `products` chỉ có 4 trường: `name` (String), `price` (double), `soluong` (int), `image` (String).
-   - Document ID do Firestore sinh tự động trên cloud, tuyệt đối không chèn `id` hay bất kỳ metadata nào vào payload dữ liệu của sản phẩm.
-3. **Chức năng xuất JSON nộp bài (Export for Submission):**
-   - Tích hợp nút **"Xuất file CSDL nộp bài"** ngay trên thanh công cụ Web Admin. Khi bấm, hệ thống sẽ truy vấn toàn bộ dữ liệu thực tế từ Firebase Firestore, định dạng chuẩn mảng JSON 4 trường và lưu ra file `database/products.json` kèm sao chép vào Clipboard.
-4. **Cơ chế Fallback thông minh (Graceful Handling):**
-   - Cung cấp sẵn file `firebase_options.dart` để điền cấu hình Firebase. Trong trường hợp chưa kết nối mạng hoặc chưa gắn API Key, hệ thống tự động thông báo trạng thái kết nối trực quan cho người dùng.
-5. **State Management:**
-   - `ProductProvider` đăng ký `StreamSubscription` lắng nghe sự thay đổi của collection Firestore. Khi Firestore có bản ghi mới, provider lập tức cập nhật state và UI tự động render.
+## Architecture & UX/UI Decisions (Nguyên tắc thiết kế)
+
+### 1. Loại bỏ "AI Aesthetic" & Xây dựng Design System chuẩn mực
+- **Bảng màu (Color Palette):**
+  - Surface & Background: Slate 50 (`#F8FAFC`), Pure White (`#FFFFFF`), Border Slate 200 (`#E2E8F0`).
+  - Primary Brand: Deep Indigo (`#4F46E5` / `#4338CA`) — tạo cảm giác chuyên nghiệp, tin cậy.
+  - Semantic Status:
+    - Thành công / Còn hàng: Emerald (`#10B981` / text: `#065F46`, bg: `#ECFDF5`).
+    - Cảnh báo / Sắp hết hàng (<=5): Amber (`#F59E0B` / text: `#92400E`, bg: `#FFFBEB`).
+    - Báo động / Hết hàng / Xóa: Rose (`#F43F5E` / text: `#9F1239`, bg: `#FFF1F2`).
+- **Typography & Scale:**
+  - Tiêu đề Trang: 24px SemiBold.
+  - Tiêu đề Mục: 16px Medium.
+  - Nội dung: 14px Regular.
+  - Metadata / Nhãn phụ: 12px Regular/Medium.
+- **Border Radius:** Nhất quán `8px` cho nút/input, `12px` cho cards/dialogs, `20px` cho badges (không bo tròn quá đà).
+
+### 2. Cấu trúc Giao diện Admin Shell (Modern SaaS Layout)
+- **Web Desktop (>= 900px):**
+  - **Sidebar Cố Định (Collapsible):** Logo thương hiệu, menu chức năng (Tổng quan, Sản phẩm, Báo cáo CSDL, Cài đặt), thông tin tài khoản Admin đang đăng nhập.
+  - **Top Navigation Bar:** Thanh tìm kiếm nhanh kèm phím tắt gợi ý, chỉ báo trạng thái Firebase Realtime với hiệu ứng Pulse xanh lá, nút Quick Action ("+ Thêm sản phẩm", "Xuất JSON").
+  - **Content Area:** Thống kê KPI Cards với trend indicators -> Bộ lọc nhanh (Tất cả, Còn hàng, Sắp hết) -> Nút chuyển đổi View Mode (Bảng dữ liệu Table & Lưới thẻ Grid) -> Danh sách sản phẩm.
+- **Mobile Responsive (< 900px):**
+  - Drawer Navigation mở từ cạnh trái.
+  - Bố cục một cột co giãn linh hoạt, các thẻ sản phẩm tối ưu diện tích chạm (Touch Target >= 44px).
+
+### 3. Cải tiến Form Thêm/Sửa Sản Phẩm (2-Column & Live Preview)
+- **Trên Web:** Chia làm 2 cột:
+  - Cột trái: Nhập thông tin (Tên, Giá có format VNĐ realtime, Số lượng có nút tăng giảm Stepper).
+  - Cột phải: Media Dropzone & **Live Preview Card** (Admin gõ đến đâu, chiếc thẻ sản phẩm thực tế hiển thị ngay đến đó giúp hình dung giao diện cuối cùng).
+- **Trên Mobile:** Xếp chồng dọc tự nhiên, giữ nguyên tính năng xem trước ảnh.
+
+### 4. Đảm bảo 100% Ràng buộc Đề bài:
+- Toàn bộ cơ sở dữ liệu và model vẫn giữ nghiêm ngặt **CHỈ ĐÚNG 4 TRƯỜNG**: `name`, `price`, `soluong`, `image`.
+- Toàn bộ cải tiến UX/UI là nâng cao ở tầng Presentation & Interaction, không làm thay đổi cấu trúc dữ liệu.
 
 ---
 
 ## Dependency Graph
 ```
-pubspec.yaml (firebase_core, cloud_firestore, provider, image_picker, intl)
+lib/theme/app_theme.dart (Hệ thống màu sắc, typography, card style, button style)
     │
-    ├── lib/firebase_options.dart (Cấu hình Firebase Web & Mobile)
+    ├── lib/widgets/admin_sidebar.dart (Thanh điều hướng Sidebar cho Admin)
+    ├── lib/widgets/top_nav_bar.dart (Thanh Top Bar với Search & Pulse Status)
+    ├── lib/widgets/kpi_card.dart (Thẻ chỉ số thống kê kho hàng cao cấp)
     │
-    ├── lib/models/product.dart (Model chuẩn 4 trường)
+    ├── lib/widgets/product_table_view.dart (Chế độ xem Bảng dữ liệu quản trị chuẩn)
+    ├── lib/widgets/product_grid_view.dart (Chế độ xem Lưới sản phẩm nâng cao)
     │
-    ├── lib/services/product_service.dart (Firebase Firestore CRUD + Realtime Stream + Export JSON)
-    │       │
-    │       └── lib/providers/product_provider.dart (Lắng nghe Stream Firestore, Tìm kiếm, Sắp xếp, Thống kê)
-    │               │
-    │               ├── lib/screens/login_screen.dart (Đăng nhập Admin)
-    │               ├── lib/screens/admin_dashboard_screen.dart (Web Dashboard Realtime + Nút xuất JSON)
-    │               ├── lib/screens/product_form_screen.dart (Thêm / Sửa trực tiếp lên Firestore)
-    │               └── lib/screens/product_detail_screen.dart (Chi tiết trên Mobile đồng bộ Realtime)
-    │
-    └── database/products.json (File CSDL xuất từ Firebase để nộp bài)
+    ├── lib/screens/login_screen.dart (Redesign Split-screen hiện đại)
+    ├── lib/screens/admin_dashboard_screen.dart (Tổng hợp Admin Shell)
+    ├── lib/screens/product_form_screen.dart (2-Column + Live Preview)
+    └── lib/screens/product_detail_screen.dart (Mobile Product Sheet cao cấp)
 ```
 
 ---
 
-## Task Breakdown Phases (Kế hoạch triển khai Firebase Realtime)
+## Task Breakdown Phases
 
-### Phase 1: Tích hợp Firebase SDK & Cấu hình Free Spark Plan
-- **Task 1:** Bổ sung `firebase_core` và `cloud_firestore` vào `pubspec.yaml`.
-- **Task 2:** Tạo file `lib/firebase_options.dart` chứa cấu hình khởi tạo Firebase cho cả Web và Mobile.
-- **Task 3:** Cập nhật `lib/main.dart` để khởi tạo `Firebase.initializeApp()`.
+### Phase 1: Hệ Thống Theme & Token Thiết Kế (Design System Foundation)
+- **Task 1:** Tạo `lib/theme/app_theme.dart` định nghĩa toàn bộ palette màu, typography, card decoration, shadow tinh tế và component themes.
+- **Task 2:** Tạo các widget hiển thị trạng thái chuẩn UI: `kpi_card.dart` (thẻ thống kê) và `status_badge.dart` (huy hiệu tình trạng tồn kho: Còn hàng, Sắp hết, Hết hàng).
 
-### Checkpoint 1: Firebase Initialized
-- [ ] Cấu hình Firebase SDK thành công, sẵn sàng kết nối Cloud Firestore.
-
----
-
-### Phase 2: Nâng cấp Service & Provider sang Realtime Stream
-- **Task 4:** Cập nhật `ProductService` kết nối trực tiếp Cloud Firestore:
-  - Hàm `getProductsStream()` trả về `Stream<List<Product>>` lắng nghe thời gian thực.
-  - Hàm `addProduct()`, `updateProduct()`, `deleteProduct()` ghi trực tiếp lên Firestore.
-  - Hàm `exportFirestoreToJson()` đọc toàn bộ document trên Firestore và xuất ra `database/products.json`.
-- **Task 5:** Cập nhật `ProductProvider` đăng ký lắng nghe Firestore Stream và cập nhật danh sách hiển thị tự động.
-
-### Checkpoint 2: Realtime CRUD Active
-- [ ] Dữ liệu hiển thị trực tiếp từ Firebase Firestore.
-- [ ] Thêm/Sửa/Xóa đồng bộ trực tiếp lên Firebase.
+### Checkpoint 1: Theme Ready
+- [ ] Bảng màu nhất quán, không dùng màu mặc định hay gradient lòe loẹt.
+- [ ] Typography phân cấp rõ ràng theo chuẩn 8px grid.
 
 ---
 
-### Phase 3: Giao diện Web Admin & Tính năng Xuất JSON nộp bài
-- **Task 6:** Cập nhật `AdminDashboardScreen` hiển thị trạng thái kết nối Firebase ("Firebase Realtime Connected") và nút "Xuất file CSDL nộp bài".
-- **Task 7:** Kiểm tra tính năng sửa, xóa và form thêm mới sản phẩm hoạt động mượt mà với Firestore.
+### Phase 2: Redesign Màn Hình Đăng Nhập (Login Screen Split-Layout)
+- **Task 3:** Tái thiết kế `LoginScreen` với bố cục Split-Screen trên Web (Cột trái: Giới thiệu hệ thống quản trị & minh họa; Cột phải: Form đăng nhập tinh tế với autofill 1-click cho người chấm thi).
+- **Task 4:** Responsive tự động chuyển sang Card đơn thanh lịch trên Mobile.
 
-### Checkpoint 3: Web Admin Realtime Verified
-- [ ] Chạy trên Web: Thêm sản phẩm -> dữ liệu lưu lên Firestore và xuất hiện trên danh sách trong < 1s.
-- [ ] Bấm nút xuất JSON -> tạo ra file `database/products.json` hợp lệ gồm 4 trường.
-
----
-
-### Phase 4: Đồng bộ Realtime với Mobile & Chọn ảnh
-- **Task 8:** Kiểm tra giao diện Mobile đồng bộ dữ liệu Realtime 2 chiều với Web.
-- **Task 9:** Widget chọn ảnh hỗ trợ upload link/chuỗi ảnh trực tiếp lên Firestore.
-
-### Checkpoint 4: Cross-Platform Realtime
-- [ ] Mở 2 cửa sổ (1 Web, 1 Mobile) -> sửa hoặc thêm ở cửa sổ này, cửa sổ kia tự động cập nhật ngay lập tức.
+### Checkpoint 2: Login Screen Polished
+- [ ] Màn hình đăng nhập đạt chuẩn doanh nghiệp, mượt mà và trực quan.
 
 ---
 
-### Phase 5: Cập nhật Báo Cáo & Hướng dẫn Firebase Console
-- **Task 10:** Cập nhật `docs/REPORT.md`:
-  - Hướng dẫn 3 bước tạo Firebase Project miễn phí (Spark plan) trên console.firebase.google.com.
-  - Hướng dẫn cấu hình Firestore Security Rules cho phép đọc/ghi.
-  - Vị trí dán ảnh chụp màn hình Firestore Console thể hiện rõ 4 trường `name`, `price`, `soluong`, `image`.
-  - Hướng dẫn xuất file `products.json` từ Firebase để nộp bài.
+### Phase 3: Redesign Dashboard Admin Shell & 2 Chế Độ Xem (Table & Grid)
+- **Task 5:** Xây dựng `AdminSidebar` và `TopNavBar` mang lại trải nghiệm hệ thống quản trị chuyên nghiệp.
+- **Task 6:** Xây dựng `ProductTableView` (Bảng dữ liệu quản trị với thumbnail tròn/bo góc, tên, giá nổi bật, chip số lượng, nút thao tác Sửa/Xóa).
+- **Task 7:** Nâng cấp `ProductCard` và `ProductGridView` với hover effect, badge tình trạng kho hàng và tỉ lệ ảnh chuẩn mực.
+- **Task 8:** Tích hợp bộ lọc Filter Tabs (Tất cả, Còn hàng, Cảnh báo sắp hết) và nút chuyển đổi qua lại giữa Table và Grid view trong `AdminDashboardScreen`.
+
+### Checkpoint 3: Admin Dashboard Transformed
+- [ ] Chuyển đổi mượt mà giữa Table view và Grid view.
+- [ ] Thống kê KPI hiển thị đẹp mắt, lọc sản phẩm nhanh chóng.
+
+---
+
+### Phase 4: Redesign Form Thêm/Sửa với Live Preview
+- **Task 9:** Tái thiết kế `ProductFormScreen` theo dạng 2 cột: Form nhập liệu bên trái + Khung xem trước thẻ sản phẩm thực tế bên phải (Live Preview).
+- **Task 10:** Nâng cấp `ImageInputWidget` với khung dropzone trực quan, preview tức thì và nút xóa ảnh tinh tế.
+
+### Checkpoint 4: Form Experience Enhanced
+- [ ] Người dùng thấy ngay kết quả sản phẩm khi đang gõ tên/giá/số lượng/ảnh.
+
+---
+
+### Phase 5: Redesign Mobile Detail & Cập Nhật Báo Cáo
+- **Task 11:** Tinh chỉnh `ProductDetailScreen` tối ưu hóa trải nghiệm vuốt chạm trên Mobile.
+- **Task 12:** Cập nhật ảnh chụp và tài liệu `docs/REPORT.md` phản ánh thiết kế UI mới.
 
 ---
 
 ## Risks and Mitigations
 | Rủi ro | Mức độ | Biện pháp giảm thiểu |
 |---|---|---|
-| Người chấm thi chạy offline không có mạng | Trung bình | `ProductService` thiết kế tự động fall back sang Local Memory Cache nếu mất mạng, đảm bảo app không bao giờ bị crash màn hình trắng. |
-| Firebase Security Rules bị chặn quyền ghi | Thấp | Cung cấp sẵn Security Rules chuẩn mở `allow read, write: if true;` trong tài liệu báo cáo để thiết lập trong 1 click. |
-| Thêm trường lạ ngoài 4 trường quy định | Rất cao | Model `Product` và mapper Firestore lọc sạch, chỉ lưu đúng 4 key: `name`, `price`, `soluong`, `image`. |
+| Giao diện quá phức tạp làm vỡ bố cục trên màn hình nhỏ | Trung bình | Áp dụng triệt để `LayoutBuilder` và breakpoints (360px, 600px, 900px, 1200px) để tự động co giãn. |
+| Thay đổi UI vô tình vi phạm cấu trúc 4 trường của CSDL | Cao | Tuyệt đối giữ nguyên `Product` model và Firestore data payload: CHỈ CÓ 4 TRƯỜNG `name`, `price`, `soluong`, `image`. |

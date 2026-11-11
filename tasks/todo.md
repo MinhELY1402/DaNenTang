@@ -1,99 +1,91 @@
-# Todo List: Triển Khai Firebase Realtime Database (Bản Free Spark Plan)
+# Todo List: Kế Hoạch UX/UI Redesign Theo Chuẩn Frontend UI Engineering
 
-## Phase 1: Tích Hợp Firebase SDK & Khởi Tạo
-- [x] Task 1: Khai báo `firebase_core` và `cloud_firestore` trong `pubspec.yaml`
-  - Acceptance: `pubspec.yaml` có khai báo `firebase_core: ^2.27.0` và `cloud_firestore: ^4.15.8`.
-  - Verify: File `pubspec.yaml` cấu hình thành công.
-  - Files: `pubspec.yaml`
-  - Scope: XS (1 file)
-
-- [x] Task 2: Tạo cấu hình `lib/firebase_options.dart`
-  - Acceptance: File chứa `DefaultFirebaseOptions.currentPlatform` hỗ trợ Web và Android với cấu hình chuẩn của Firebase Project (Free Spark plan).
-  - Verify: File `lib/firebase_options.dart` sẵn sàng.
-  - Files: `lib/firebase_options.dart`
-  - Scope: S (1 file)
-
-- [x] Task 3: Cập nhật `lib/main.dart` khởi tạo Firebase
-  - Acceptance: `main()` gọi `WidgetsFlutterBinding.ensureInitialized()` và `Firebase.initializeApp()`.
-  - Verify: Ứng dụng khởi động mượt mà, khởi tạo Firebase an toàn.
-  - Files: `lib/main.dart`
-  - Scope: XS (1 file)
-
-## Checkpoint 1: Firebase Initialized (HOÀN THÀNH)
-- [x] Firebase SDK đã được cấu hình và tích hợp vào dự án
-
----
-
-## Phase 2: Dịch Vụ Realtime Stream & Đồng Bộ Dữ Liệu
-- [x] Task 4: Nâng cấp `ProductService` sang Firebase Cloud Firestore
-  - Acceptance: Kết nối collection `'products'`. Cung cấp:
-    1. `Stream<List<Product>> getProductsStream()`: Lắng nghe realtime mọi thay đổi từ Firebase.
-    2. `Future<void> addProduct(Product product)`: Thêm document mới với đúng 4 trường `name`, `price`, `soluong`, `image`.
-    3. `Future<void> updateProduct(String id, Product product)`: Sửa document trên Firestore.
-    4. `Future<void> deleteProduct(String id)`: Xóa document trên Firestore.
-    5. `Future<String> exportToJson()`: Tải toàn bộ data từ Firestore và xuất ra file `database/products.json`.
-  - Verify: Dữ liệu CRUD trực tiếp lên Firebase Cloud, không dùng file JSON cục bộ làm nguồn.
-  - Files: `lib/services/product_service.dart`
-  - Scope: M (1 file)
-
-- [x] Task 5: Nâng cấp `ProductProvider` với Stream Subscription
-  - Acceptance: Provider tự động lắng nghe `getProductsStream()`, tự động cập nhật danh sách `filteredProducts` khi có bất kỳ thay đổi nào từ Firebase mà không cần reload giao diện.
-  - Verify: Thêm ở tab 1 -> tab 2 cập nhật tức thì qua Stream.
-  - Files: `lib/providers/product_provider.dart`
-  - Scope: S (1 file)
-
-## Checkpoint 2: Realtime Stream Active (HOÀN THÀNH)
-- [x] Dữ liệu kết nối trực tiếp với Firebase Cloud Firestore
-- [x] Cập nhật tức thì giữa các màn hình
-
----
-
-## Phase 3: Giao Diện Web Admin & Nút Xuất JSON Nộp Bài
-- [x] Task 6: Cập nhật `AdminDashboardScreen`
-  - Acceptance: Hiển thị huy hiệu "Firebase Realtime Active (Free Spark)" màu xanh lá, bổ sung nút nổi bật "Xuất JSON nộp bài" để người dùng xuất file JSON từ Firebase khi hoàn tất.
-  - Verify: Giao diện hiển thị trạng thái kết nối và xuất JSON thành công.
-  - Files: `lib/screens/admin_dashboard_screen.dart`
-  - Scope: S (1 file)
-
-- [x] Task 7: Cập nhật `ProductFormScreen` và `ProductCard` tương thích với Firestore
-  - Acceptance: Thao tác Thêm, Sửa, Xóa tương thích với Document ID của Firestore nhưng payload gửi lên Firestore chỉ có đúng 4 trường.
-  - Verify: Lưu thành công lên Firebase Firestore.
-  - Files: `lib/screens/product_form_screen.dart`, `lib/widgets/product_card.dart`
+## Phase 1: Hệ Thống Design System & Tokens
+- [x] Task 1: Khởi tạo Design System Theme `lib/theme/app_theme.dart`
+  - Acceptance: Định nghĩa bảng màu SaaS chuyên nghiệp (Slate, Indigo, Emerald, Amber, Rose), Typography scale chuẩn mực, Input/Button/Card themes nhất quán.
+  - Verify: Áp dụng vào `lib/main.dart` thành công.
+  - Files: `lib/theme/app_theme.dart`, `lib/main.dart`
   - Scope: S (2 files)
 
-## Checkpoint 3: Web Admin Realtime Hoàn Thành (HOÀN THÀNH)
-- [x] Chạy trên Web: CRUD trực tiếp lên Firebase Firestore
-- [x] Xuất file `database/products.json` từ Firestore thành công
+- [x] Task 2: Tạo Widget hiển thị chỉ số kho hàng `lib/widgets/kpi_card.dart` và `lib/widgets/status_badge.dart`
+  - Acceptance: Thẻ KPI thống kê có biểu tượng, số liệu lớn, nhãn phụ và chỉ báo màu sắc ngữ nghĩa; Status Badge phân loại: "Còn hàng" (xanh lá), "Sắp hết" (vàng cam), "Hết hàng" (đỏ).
+  - Verify: Hiển thị đúng màu và dữ liệu theo số lượng sản phẩm.
+  - Files: `lib/widgets/kpi_card.dart`, `lib/widgets/status_badge.dart`
+  - Scope: S (2 files)
+
+## Checkpoint 1: Design Tokens Active (HOÀN THÀNH)
+- [x] Theme và các widget hiển thị trạng thái chuẩn sẵn sàng
 
 ---
 
-## Phase 4: Đồng Bộ Realtime Mobile & Nhập Ảnh
-- [x] Task 8: Tối ưu `ProductDetailScreen` và `ImageInputWidget` trên Mobile
-  - Acceptance: Xem chi tiết sản phẩm đồng bộ realtime với dữ liệu Firebase; hỗ trợ chọn ảnh và đẩy ảnh lên sản phẩm.
-  - Verify: Giao diện Mobile hiển thị chuẩn xác dữ liệu từ Firebase.
-  - Files: `lib/screens/product_detail_screen.dart`
-  - Scope: XS (1 file)
-
-## Checkpoint 4: Mobile Realtime Hoàn Thành (HOÀN THÀNH)
-- [x] Nền tảng Mobile kết nối và đồng bộ trực tiếp với Firebase Firestore
-
----
-
-## Phase 5: Cập Nhật Báo Cáo & Hướng Dẫn Firebase Console
-- [x] Task 9: Cập nhật tài liệu `docs/REPORT.md`
-  - Acceptance: Bổ sung mục hướng dẫn thiết lập Firebase Console (tạo project free Spark, bật Firestore, cấu hình Security Rules mở, chụp ảnh màn hình CSDL Firebase gồm 4 trường).
-  - Verify: Bản báo cáo đầy đủ hướng dẫn thực hành Firebase thực tế.
-  - Files: `docs/REPORT.md`
-  - Scope: M (1 file)
-
-- [x] Task 10: Cập nhật kịch bản demo `docs/DEMO_SCRIPT.md`
-  - Acceptance: Bổ sung đoạn kịch bản quay màn hình Firebase Console chứng minh CSDL realtime và thao tác xuất file JSON khi nộp bài.
-  - Verify: Kịch bản thuyết trình đầy đủ, thuyết phục.
-  - Files: `docs/DEMO_SCRIPT.md`
+## Phase 2: Redesign Màn Hình Đăng Nhập (Login Screen)
+- [x] Task 3: Tái thiết kế `LoginScreen` với phong cách Split-Layout
+  - Acceptance: Trên Web/Desktop chia làm 2 phần: Banner giới thiệu thương hiệu và hệ thống quản trị bên trái; Khung đăng nhập tối giản, tương phẩn cao bên phải với nút 1-click Demo credentials. Tự động chuyển sang Card đơn trên Mobile.
+  - Verify: Đăng nhập trơn tru, giao diện hiện đại chuẩn SaaS.
+  - Files: `lib/screens/login_screen.dart`
   - Scope: S (1 file)
 
-## Checkpoint 5: Sẵn Sàng Nộp Bài (10/10 ĐIỂM - HOÀN TẤT)
-- [x] Ứng dụng chạy Realtime hoàn toàn với Firebase
-- [x] CSDL Firestore chuẩn 4 trường dữ liệu
-- [x] File xuất `database/products.json` sẵn sàng
-- [x] Báo cáo và kịch bản video demo đầy đủ
+## Checkpoint 2: Login Screen Polished (HOÀN THÀNH)
+- [x] Màn hình đăng nhập đạt chuẩn SaaS chuyên nghiệp
+
+---
+
+## Phase 3: Redesign Dashboard Admin Shell & Dual View (Table & Grid)
+- [x] Task 4: Xây dựng Admin Sidebar `lib/widgets/admin_sidebar.dart`
+  - Acceptance: Thanh điều hướng bên trái cho màn hình máy tính (logo, danh mục menu: Dashboard, Sản phẩm, Báo cáo CSDL, tài khoản admin, nút đăng xuất). Hỗ trợ đóng mở responsive.
+  - Verify: Responsive Drawer trên Mobile, Sidebar cố định trên Web.
+  - Files: `lib/widgets/admin_sidebar.dart`
+  - Scope: S (1 file)
+
+- [x] Task 5: Xây dựng chế độ xem Bảng dữ liệu `lib/widgets/product_table_view.dart`
+  - Acceptance: Chế độ Data Table chuẩn quản trị: Cột Ảnh thumbnail, Tên sản phẩm, Giá nổi bật, Huy hiệu tồn kho, và Cột hành động (Sửa/Xóa). Hỗ trợ sắp xếp nhanh theo cột.
+  - Verify: Hiển thị dạng bảng sắc nét, cuộn ngang mượt mà khi màn hình hẹp.
+  - Files: `lib/widgets/product_table_view.dart`
+  - Scope: M (1 file)
+
+- [x] Task 6: Nâng cấp `ProductCard` và `AdminDashboardScreen`
+  - Acceptance: Nâng cấp thẻ sản phẩm với tỷ lệ ảnh chuẩn 16:10, hiệu ứng hover viền tinh tế, nút chuyển đổi Toggle qua lại giữa [Xem Dạng Bảng] và [Xem Dạng Thẻ]. Bổ sung các Filter Chips (Tất cả, Còn hàng, Sắp hết).
+  - Verify: Bấm chuyển đổi giữa Bảng và Lưới phản hồi ngay lập tức, dữ liệu đồng bộ 100%.
+  - Files: `lib/widgets/product_card.dart`, `lib/screens/admin_dashboard_screen.dart`
+  - Scope: M (2 files)
+
+## Checkpoint 3: Admin Dashboard Transformed (HOÀN THÀNH)
+- [x] Trải nghiệm quản trị sản phẩm hiện đại với 2 chế độ hiển thị linh hoạt
+
+---
+
+## Phase 4: Redesign Form Thêm/Sửa với Live Preview
+- [x] Task 7: Tái thiết kế `ProductFormScreen` theo dạng 2 cột kèm Live Preview
+  - Acceptance: Trên Web chia 2 cột: Cột trái nhập liệu Tên, Giá (format VNĐ realtime), Số lượng; Cột phải hiển thị thẻ sản phẩm thực tế thời gian thực (Live Preview Card) cập nhật ngay khi admin nhập liệu.
+  - Verify: Nhập tên/giá/ảnh bên trái -> thẻ bên phải cập nhật tức thì.
+  - Files: `lib/screens/product_form_screen.dart`
+  - Scope: M (1 file)
+
+- [x] Task 8: Nâng cấp `ImageInputWidget`
+  - Acceptance: Khung chọn ảnh dạng Dropzone chuyên nghiệp, có tab chuyển đổi giữa [Tải ảnh từ máy / Camera] và [Dán liên kết URL], có nút xóa ảnh và khung xem trước bo tròn tinh tế.
+  - Verify: Chọn ảnh từ máy hoặc URL hoạt động hoàn hảo.
+  - Files: `lib/widgets/image_input_widget.dart`
+  - Scope: S (1 file)
+
+## Checkpoint 4: Form & Live Preview Complete (HOÀN THÀNH)
+- [x] Trải nghiệm nhập liệu sản phẩm trực quan, đẳng cấp
+
+---
+
+## Phase 5: Tối Ưu Mobile & Hoàn Thiện Hồ Sơ
+- [x] Task 9: Tinh chỉnh màn hình Mobile `ProductDetailScreen`
+  - Acceptance: Giao diện chi tiết sản phẩm trên Mobile với hình ảnh tràn viền bo góc, thanh thông tin nổi, trạng thái kho hàng và thanh hành động nổi cố định dưới đáy màn hình (Bottom Action Bar).
+  - Verify: Thao tác vuốt chạm trên Mobile mượt mà, dễ bấm bằng một tay.
+  - Files: `lib/screens/product_detail_screen.dart`
+  - Scope: S (1 file)
+
+- [x] Task 10: Cập nhật tài liệu Báo cáo `docs/REPORT.md`
+  - Acceptance: Bổ sung phần giới thiệu Design System mới và các cải tiến UX/UI nổi bật để ghi điểm tuyệt đối trong báo cáo.
+  - Verify: File báo cáo đầy đủ thông tin nâng cấp.
+  - Files: `docs/REPORT.md`
+  - Scope: S (1 file)
+
+## Checkpoint 5: UI Redesign Final Review (HOÀN TẤT)
+- [x] Toàn bộ ứng dụng lột xác với diện mạo mới
+- [x] Ràng buộc 4 trường CSDL vẫn được bảo toàn nguyên vẹn
+- [x] Trải nghiệm người dùng đạt chuẩn sản phẩm thực tế
