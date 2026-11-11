@@ -9,7 +9,7 @@
 - **Mã số sinh viên (MSSV):** [Điền MSSV]
 - **Lớp học phần:** [Điền Lớp]
 - **Giảng viên hướng dẫn:** [Điền Tên Giảng Viên]
-- **Cơ sở dữ liệu:** **Firebase Cloud Firestore (Bản Free Spark Plan)**
+- **Cơ sở dữ liệu:** **Firebase Cloud Firestore (Bản Free Spark Plan)** - Project ID: `danentang-b5b16`
 - **Link GitHub Source Code:** `https://github.com/[username]/admin_product_manager`
 - **Link Video Demo:** `https://youtu.be/[video_id]` hoặc `https://drive.google.com/...`
 - **File Cơ sở dữ liệu nộp kèm:** `database/products.json` (Xuất trực tiếp từ Firebase)
@@ -38,14 +38,12 @@ Xây dựng ứng dụng quản trị (Admin) sản phẩm chạy đồng thời
 
 ## PHẦN 2: THIẾT LẬP FIREBASE CLOUD FIRESTORE (MIỄN PHÍ - SPARK PLAN)
 
-### 2.1. Các bước khởi tạo Firebase Project miễn phí
-1. Truy cập vào [https://console.firebase.google.com](https://console.firebase.google.com) và đăng nhập tài khoản Google.
-2. Bấm **"Add project"** (Thêm dự án), đặt tên dự án ví dụ: `admin-product-manager` (chọn gói mặc định **Spark - Miễn phí 100%**).
-3. Tại menu bên trái, chọn **Build** -> **Firestore Database** -> Bấm **"Create database"**.
-4. Chọn vị trí máy chủ (ví dụ: `asia-southeast1` - Singapore hoặc `us-central`).
-5. Tạo một Collection có tên là: `products`.
+### 2.1. Thông số Project Firebase kết nối thực tế
+- **Project ID:** `danentang-b5b16`
+- **Collection CSDL:** `products`
+- **Trạng thái kết nối:** Đã kiểm thử thành công qua Firestore REST API & Flutter SDK (HTTP 200 OK).
 
-### 2.2. Cấu hình Firebase Security Rules (Cho phép đọc/ghi bài tập giữa kỳ)
+### 2.2. Cấu hình Firebase Security Rules
 Tại tab **Rules** của Firestore, cấu hình luật bảo mật cho phép đọc và ghi dữ liệu:
 ```javascript
 rules_version = '2';
@@ -57,10 +55,6 @@ service cloud.firestore {
   }
 }
 ```
-*Bấm "Publish" để lưu luật bảo mật.*
-
-### 2.3. Cấu hình trong Flutter (`lib/firebase_options.dart`)
-Thêm Firebase Web App và Android App trong Firebase Console, sau đó lấy thông số cấu hình điền vào file `lib/firebase_options.dart`.
 
 ---
 
@@ -108,7 +102,7 @@ ProductService ◄────────────── ProductProvider (Ch
                  ┌──────────────────────┴──────────────────────┐
                  ▼                                             ▼
         Web Admin Platform                            Mobile Platform
-    (Chrome - Realtime Grid)                      (Card View & Chi tiết)
+   (Data Table & Grid View)                       (Card View & Chi tiết)
 ```
 
 ### 4.2. Model `Product` tuân thủ nghiêm ngặt 4 trường (`lib/models/product.dart`)
@@ -148,9 +142,21 @@ class Product {
 
 ---
 
-## PHẦN 5: HÌNH ẢNH MINH HỌA KẾT QUẢ THỰC HIỆN
+## PHẦN 5: ĐẶC TẢ KIẾN TRÚC TRẢI NGHIỆM NGƯỜI DÙNG (UX/UI REDESIGN)
 
-### 5.1. Ảnh chụp Cơ sở dữ liệu Firebase Cloud Firestore
+Ứng dụng được thiết kế theo các nguyên tắc kỹ thuật giao diện hiện đại (**Frontend UI Engineering**), loại bỏ hoàn toàn các mẫu thiết kế chung chung:
+1. **Design System & Semantic Tokens (`lib/theme/app_theme.dart`):** Bảng màu trung tính Slate 50 (`#F8FAFC`), Deep Indigo (`#4F46E5`), Emerald (Còn hàng), Amber (Sắp hết), Rose (Hết hàng/Xóa).
+2. **Màn hình Đăng nhập Split-Layout (`lib/screens/login_screen.dart`):** Phân chia 2 cột trên Desktop (giới thiệu tính năng bên trái, form đăng nhập bên phải), có nút tự động điền tài khoản mẫu tiện lợi.
+3. **Bố cục Admin Shell với Sidebar & TopBar (`lib/widgets/admin_sidebar.dart`):** Cố định trên Desktop và biến thành Drawer trên Mobile.
+4. **Chế độ hiển thị kép Dual-View (`Table View` & `Grid View`):** Người dùng có thể linh hoạt chuyển đổi giữa dạng bảng quản trị dữ liệu chi tiết và dạng lưới thẻ hình ảnh.
+5. **Form Thêm/Sửa sản phẩm 2 cột kèm Live Preview Card (`lib/screens/product_form_screen.dart`):** Admin gõ thông tin hoặc đổi ảnh bên trái, chiếc thẻ sản phẩm thực tế bên phải lập tức cập nhật theo thời gian thực trước khi lưu.
+6. **Huy hiệu trạng thái kho hàng thông minh (`StatusBadge`):** Phân loại trực quan: Còn hàng (Xanh lá), Sắp hết hàng <= 5 (Vàng cam), Hết hàng (Đỏ).
+
+---
+
+## PHẦN 6: HÌNH ẢNH MINH HỌA KẾT QUẢ THỰC HIỆN
+
+### 6.1. Ảnh chụp Cơ sở dữ liệu Firebase Cloud Firestore
 > *(Chụp màn hình Firebase Console tại collection `products` thể hiện rõ ràng các document CHỈ CÓ ĐÚNG 4 TRƯỜNG: `name`, `price`, `soluong`, `image`)*
 
 ```
@@ -162,36 +168,43 @@ class Product {
 +--------------------------------------------------------------------------+
 ```
 
-### 5.2. Ảnh chụp Giao diện Đăng nhập Admin
+### 6.2. Ảnh chụp Giao diện Đăng nhập Split-Layout
 ```
 +--------------------------------------------------------------------------+
 |                                                                          |
-|               [DÁN ẢNH MÀN HÌNH ĐĂNG NHẬP ADMIN TẠI ĐÂY]                 |
-|                                                                          |
-+--------------------------------------------------------------------------+
-```
-
-### 5.3. Ảnh chụp Giao diện Web Admin Dashboard (8.0 điểm + 1.5 điểm)
-> *(Chụp ảnh Chrome: danh sách sản phẩm thời gian thực, huy hiệu "Firebase Realtime Active", thanh thống kê kho)*
-
-```
-+--------------------------------------------------------------------------+
-|                                                                          |
-|            [DÁN ẢNH GIAO DIỆN CHẠY TRÊN WEB CHROME TẠI ĐÂY]              |
+|          [DÁN ẢNH MÀN HÌNH ĐĂNG NHẬP SPLIT-LAYOUT TẠI ĐÂY]               |
 |                                                                          |
 +--------------------------------------------------------------------------+
 ```
 
-### 5.4. Ảnh chụp Form Thêm mới / Chỉnh sửa trực tiếp lên Firebase
+### 6.3. Ảnh chụp Giao diện Web Admin - Chế độ Bảng (Table View)
 ```
 +--------------------------------------------------------------------------+
 |                                                                          |
-|              [DÁN ẢNH FORM THÊM / SỬA SẢN PHẨM TẠI ĐÂY]                  |
+|       [DÁN ẢNH GIAO DIỆN CHẠY TRÊN WEB CHROME (TABLE VIEW) TẠI ĐÂY]      |
 |                                                                          |
 +--------------------------------------------------------------------------+
 ```
 
-### 5.5. Ảnh chụp Hộp thoại Xuất CSDL JSON từ Firebase nộp bài
+### 6.4. Ảnh chụp Giao diện Web Admin - Chế độ Lưới (Grid View)
+```
++--------------------------------------------------------------------------+
+|                                                                          |
+|        [DÁN ẢNH GIAO DIỆN CHẠY TRÊN WEB CHROME (GRID VIEW) TẠI ĐÂY]      |
+|                                                                          |
++--------------------------------------------------------------------------+
+```
+
+### 6.5. Ảnh chụp Form Thêm/Sửa với Tính năng Live Preview
+```
++--------------------------------------------------------------------------+
+|                                                                          |
+|      [DÁN ẢNH FORM THÊM / SỬA KÈM LIVE PREVIEW CARD TẠI ĐÂY]             |
+|                                                                          |
++--------------------------------------------------------------------------+
+```
+
+### 6.6. Ảnh chụp Hộp thoại Xuất CSDL JSON từ Firebase nộp bài
 ```
 +--------------------------------------------------------------------------+
 |                                                                          |
@@ -200,8 +213,8 @@ class Product {
 +--------------------------------------------------------------------------+
 ```
 
-### 5.6. Ảnh chụp Giao diện trên nền tảng Mobile (0.5 điểm)
-> *(Chụp ảnh chạy trên thiết bị di động / giả lập Android: chọn ảnh và xem chi tiết đồng bộ với Web)*
+### 6.7. Ảnh chụp Giao diện trên nền tảng Mobile (0.5 điểm)
+> *(Chụp ảnh chạy trên thiết bị di động / giả lập Android: chọn ảnh từ máy và xem chi tiết đồng bộ với Web)*
 
 ```
 +--------------------------------------------------------------------------+
@@ -213,12 +226,12 @@ class Product {
 
 ---
 
-## PHẦN 6: ĐÁNH GIÁ KẾT QUẢ VÀ TỰ CHẤM ĐIỂM
+## PHẦN 7: ĐÁNH GIÁ KẾT QUẢ VÀ TỰ CHẤM ĐIỂM
 
 | STT | Yêu cầu đề bài | Điểm tối đa | Kết quả đạt được | Tự chấm |
 |---|---|:---:|---|:---:|
 | 1 | Thêm, hiển thị `name`, `price`, `soluong`, `image` chạy trên nền tảng Web qua Firebase | 8.0 | Hoàn thành 100%: Dữ liệu lưu và đồng bộ thời gian thực với Firebase Cloud Firestore, hiển thị đầy đủ 4 trường trên Chrome | 8.0 / 8.0 |
-| 2 | Đăng nhập Admin, Sửa, Xóa, các tính năng nâng cao (Tìm kiếm, Sắp xếp, Thống kê kho hàng) | 1.5 | Hoàn thành 100%: Đăng nhập Admin bảo mật, Sửa/Xóa trực tiếp trên Firebase, Tìm kiếm tức thì, Thống kê kho tự động | 1.5 / 1.5 |
+| 2 | Đăng nhập Admin, Sửa, Xóa, các tính năng nâng cao (Tìm kiếm, Sắp xếp, Thống kê kho hàng, Dual-View) | 1.5 | Hoàn thành 100%: Đăng nhập Admin bảo mật, Sửa/Xóa trực tiếp trên Firebase, Tìm kiếm tức thì, Thống kê kho tự động, chuyển đổi Table/Grid linh hoạt | 1.5 / 1.5 |
 | 3 | Nhập hình ảnh từ thiết bị và hiển thị thông tin sản phẩm trên nền tảng di động (Mobile) | 0.5 | Hoàn thành 100%: Tích hợp `image_picker` chọn ảnh từ thư viện/camera và màn hình chi tiết Responsive tối ưu trên Mobile | 0.5 / 0.5 |
 | 4 | File CSDL nộp kèm (`products.json`), xuất từ Firebase, tuân thủ chỉ gồm đúng 4 trường | Bắt buộc | Hoàn thành 100%: Nút "Xuất JSON nộp bài" tải trực tiếp từ Firebase Firestore thành file `database/products.json` chuẩn 4 trường | Đạt |
 | **TỔNG CỘNG** | **10.0 / 10.0** | | | **10.0 / 10.0** |
